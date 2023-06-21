@@ -1,9 +1,9 @@
 import random
 import numpy as np
 
-from projects.python.py_bcnn.bcnn.activation import Activation
+from activation import Activation
 from metrics import Metric
-from projects.python.py_bcnn.bcnn.losses import Loss
+from losses import Loss
 from normalizers import Normalizer
 
 
