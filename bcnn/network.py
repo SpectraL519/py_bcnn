@@ -1,10 +1,9 @@
-import random
 import numpy as np
 
-from activation import Activation
-from metrics import Metric
-from losses import Loss
-from normalizers import Normalizer
+from bcnn.activation import Activation
+from bcnn.metrics import Metric
+from bcnn.losses import Loss
+from bcnn.normalizers import Normalizer
 
 
 
@@ -130,12 +129,12 @@ class BinaryClassifier:
 
         loss = (
             self.loss.calculate(y_pred_probs, Y)
-            if self.loss.requires_probs()
+            if self.loss.from_probs()
             else self.loss.calculate(y_pred, Y)
         )
         metric = (
             self.metric.calculate(y_pred_probs, Y)
-            if self.metric.requires_probs()
+            if self.metric.from_probs()
             else self.metric.calculate(y_pred, Y)
         )
         return loss, metric

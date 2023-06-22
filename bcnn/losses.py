@@ -1,61 +1,64 @@
 import numpy as np
-from abc import ABC, abstractstaticmethod
+from abc import ABC, abstractmethod
 
 
 
 class Loss(ABC):
-    @abstractstaticmethod
+    @abstractmethod
     def name():
         pass
 
-    @abstractstaticmethod
-    def requires_probs():
+    @abstractmethod
+    def from_probs():
         pass
 
-    @abstractstaticmethod
+    @abstractmethod
     def calculate(y_pred: np.ndarray, y_true: np.ndarray):
         pass
 
 
 class MSE(Loss):
-    @staticmethod
-    def name():
-        return "mean_sqared_error"
-    
-    @staticmethod
-    def requires_probs():
-        return False
+    def __init__(self):
+        self.NAME = 'mean_sqared_error'
+        self.FROM_PROBS = False
 
-    @staticmethod
-    def calculate(y_pred: np.ndarray, y_true: np.ndarray) -> float:
+    def name(self):
+        return self.NAME
+    
+    def from_probs(self):
+        return self.FROM_PROBS
+    
+    def calculate(self, y_pred: np.ndarray, y_true: np.ndarray) -> float:
         return np.mean(np.square(y_pred - y_true))
     
 
 class MAE(Loss):
-    @staticmethod
-    def name():
-        return "mean_absolute_error"
-    
-    @staticmethod
-    def requires_probs():
-        return False
+    def __init__(self):
+        self.NAME = 'mean_absolute_error'
+        self.FROM_PROBS = False
 
-    @staticmethod
-    def calculate(y_pred: np.ndarray, y_true: np.ndarray) -> float:
+    def name(self):
+        return self.NAME
+    
+    def from_probs(self):
+        return self.FROM_PROBS
+    
+    def calculate(self, y_pred: np.ndarray, y_true: np.ndarray) -> float:
         return np.mean(np.absolute(y_pred - y_true))
     
 
 class BinaryCrossentropy(Loss):
-    @staticmethod
-    def name():
-        return "binary_crossentropy"
+    def __init__(self):
+        self.NAME = 'binary_crossentropy'
+        self.FROM_PROBS = True
+
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def requires_probs():
-        return True
+    def from_probs(self):
+        return self.FROM_PROBS
     
-    @staticmethod
-    def calculate(y_pred_probs: np.ndarray, y_true: np.ndarray) -> float:
+    def calculate(self, y_pred_probs: np.ndarray, y_true: np.ndarray) -> float:
         epsilon = 1e-7  # avoid division by zero
         y_pred_probs = np.clip(y_pred_probs, epsilon, 1 - epsilon) # avoid numerical instability
         
@@ -65,77 +68,82 @@ class BinaryCrossentropy(Loss):
     
 
 class Hinge(Loss):
-    @staticmethod
-    def name():
-        return "hinge_loss"
+    def __init__(self):
+        self.NAME = 'hinge_loss'
+        self.FROM_PROBS = True
+
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def requires_probs():
-        return True
+    def from_probs(self):
+        return self.FROM_PROBS
     
-    @staticmethod
-    def calculate(y_pred_probs: np.ndarray, y_true: np.ndarray) -> float:
+    def calculate(self, y_pred_probs: np.ndarray, y_true: np.ndarray) -> float:
         loss = np.maximum(0, 1 - y_true * y_pred_probs)
         return np.mean(loss)
     
 
 class SquaredHinge(Loss):
-    @staticmethod
-    def name():
-        return "squared_hinge_loss"
+    def __init__(self):
+        self.NAME = 'squared_hinge_loss'
+        self.FROM_PROBS = True
+
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def requires_probs():
-        return True
+    def from_probs(self):
+        return self.FROM_PROBS
     
-    @staticmethod
-    def calculate(y_pred_probs: np.ndarray, y_true: np.ndarray) -> float:
+    def calculate(self, y_pred_probs: np.ndarray, y_true: np.ndarray) -> float:
         loss = np.exp(-y_true * y_pred_probs)
         return np.mean(loss)
     
 
 class Exponential(Loss):
-    @staticmethod
-    def name():
-        return "exponential_loss"
+    def __init__(self):
+        self.NAME = 'exponential_loss'
+        self.FROM_PROBS = True
+
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def requires_probs():
-        return True
+    def from_probs(self):
+        return self.FROM_PROBS
     
-    @staticmethod
-    def calculate(y_pred_probs: np.ndarray, y_true: np.ndarray) -> float:
+    def calculate(self, y_pred_probs: np.ndarray, y_true: np.ndarray) -> float:
         loss = np.maximum(0, 1 - y_true * y_pred_probs)
         return np.mean(np.square(loss))
     
 
 class SigmoidCrossentropy(Loss):
-    @staticmethod
-    def name():
-        return "sigmoid_crossentropy"
+    def __init__(self):
+        self.NAME = 'sigmoid_crossentropy'
+        self.FROM_PROBS = True
+
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def requires_probs():
-        return True
+    def from_probs(self):
+        return self.FROM_PROBS
     
-    @staticmethod
-    def calculate(y_pred_probs: np.ndarray, y_true: np.ndarray) -> float:
+    def calculate(self, y_pred_probs: np.ndarray, y_true: np.ndarray) -> float:
         epsilon = 1e-7
         loss = -(y_true * np.log(y_pred_probs + epsilon) + (1 - y_true) * np.log(1 - y_pred_probs + epsilon))
         return np.mean(loss)
     
 
 class Jaccard(Loss):
-    @staticmethod
-    def name():
-        return "jaccard_loss"
+    def __init__(self):
+        self.NAME = 'jaccard_loss'
+        self.FROM_PROBS = False
+
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def requires_probs():
-        return False
+    def from_probs(self):
+        return self.FROM_PROBS
     
-    @staticmethod
-    def calculate(y_pred: np.ndarray, y_true: np.ndarray) -> float:
+    def calculate(self, y_pred: np.ndarray, y_true: np.ndarray) -> float:
         intersection = np.sum(y_true * y_pred)
         union = np.sum(y_true) + np.sum(y_pred) - intersection
 
@@ -145,16 +153,17 @@ class Jaccard(Loss):
     
 
 class Dice(Loss):
-    @staticmethod
-    def name():
-        return "jaccard_loss"
+    def __init__(self):
+        self.NAME = 'dice_loss'
+        self.FROM_PROBS = False
+
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def requires_probs():
-        return False
+    def from_probs(self):
+        return self.FROM_PROBS
     
-    @staticmethod
-    def calculate(y_pred: np.ndarray, y_true: np.ndarray) -> float:
+    def calculate(self, y_pred: np.ndarray, y_true: np.ndarray) -> float:
         intersection = np.sum(y_true * y_pred)
         union = np.sum(y_true) + np.sum(y_pred)
 

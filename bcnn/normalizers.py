@@ -1,102 +1,111 @@
 import numpy as np
-from abc import ABC, abstractstaticmethod
+from abc import ABC, abstractmethod
 
 
 
 class Normalizer(ABC):
-    @abstractstaticmethod
+    @abstractmethod
     def name():
         pass
 
-    @abstractstaticmethod
+    @abstractmethod
     def normalize(x: np.ndarray):
         pass
 
 
 class L1(Normalizer):
-    @staticmethod
-    def name():
-        return "L1"
+    def __init__(self):
+        self.NAME = 'l1'
 
-    @staticmethod
-    def normalize(x: np.ndarray) -> np.ndarray:
+    def name(self):
+        return self.NAME
+    
+    def normalize(self, x: np.ndarray) -> np.ndarray:
         return x / np.linalg.norm(x, ord=1)
 
 
 class L2(Normalizer):
-    @staticmethod
-    def name():
-        return "L2"
+    def __init__(self):
+        self.NAME = 'l2'
 
-    @staticmethod
-    def normalize(x: np.ndarray) -> np.ndarray:
+    def name(self):
+        return self.NAME
+    
+    def normalize(self, x: np.ndarray) -> np.ndarray:
         return x / np.linalg.norm(x, ord=2)
     
 
 class ZScore(Normalizer):
-    @staticmethod
-    def name():
-        return "z-score"
+    def __init__(self):
+        self.NAME = 'z-score'
+
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def normalize(x: np.ndarray) -> np.ndarray:
+    def normalize(self, x: np.ndarray) -> np.ndarray:
         mean = np.mean(x)
         std = np.std(x)
         return (x - mean) / std
     
 
 class MinMax(Normalizer):
-    @staticmethod
-    def name():
-        return "min-max"
+    def __init__(self):
+        self.NAME = 'min-max'
+
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def normalize(x: np.ndarray) -> np.ndarray:
+    def normalize(self, x: np.ndarray) -> np.ndarray:
         min_val = np.min(x)
         max_val = np.max(x)
         return (x - min_val) / (max_val - min_val)
     
 
 class LogTransform(Normalizer):
-    @staticmethod
-    def name():
-        return "log-transformation"
+    def __init__(self):
+        self.NAME = 'log-transform'
+
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def normalize(x: np.ndarray) -> np.ndarray:
+    def normalize(self, x: np.ndarray) -> np.ndarray:
         return np.log(x)
     
 
 class BoxCox(Normalizer):
-    @staticmethod
-    def name():
-        return "box-cox"
+    def __init__(self, lmbda: int = None):
+        self.NAME = 'box-cox'
+        self.LMBDA = lmbda
+
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def normalize(x: np.ndarray, lmbda: int = None) -> np.ndarray:
+    def normalize(self, x: np.ndarray) -> np.ndarray:
         return (
             np.log(x)
-            if lmbda is None
-            else (np.power(x, lmbda) - 1) / lmbda
+            if self.LMBDA is None
+            else (np.power(x, self.LMBDA) - 1) / self.LMBDA
         )
     
 
 class YeoJohnson(Normalizer):
-    @staticmethod
-    def name():
-        return "yeo-johnson"
+    def __init__(self, lmbda: int = None):
+        self.NAME = 'yeo-johnson'
+        self.LMBDA = lmbda
+
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def normalize(x: np.ndarray, lmbda: int = None) -> np.ndarray:
+    def normalize(self, x: np.ndarray) -> np.ndarray:
         if np.all(x >= 0):
             return (
                 np.log(x + 1)
-                if lmbda == 0
-                else (np.power(x + 1, lmbda) - 1) / lmbda
+                if self.LMBDA == 0
+                else (np.power(x + 1, self.LMBDA) - 1) / self.LMBDA
             )
 
         return (
             -np.log(-x + 1)
-            if lmbda == 2
-            else -((-x + 1) ** (2 - lmbda) - 1) / (2 - lmbda)
+            if self.LMBDA == 2
+            else -((-x + 1) ** (2 - self.LMBDA) - 1) / (2 - self.LMBDA)
         )

@@ -1,91 +1,91 @@
 import numpy as np
-from abc import ABC, abstractstaticmethod
+from abc import ABC, abstractmethod
 
 
 
 class Activation(ABC):
-    @abstractstaticmethod
+    @abstractmethod
     def name():
         pass
 
-    @abstractstaticmethod
+    @abstractmethod
     def calculate(x: np.ndarray):
         pass
 
-    @abstractstaticmethod
+    @abstractmethod
     def calulate_derivative(x: np.ndarray):
         pass
 
 
 class Relu(Activation):
-    @staticmethod
-    def name():
-        return "relu"
+    def __init__(self):
+        self.NAME = 'relu'
 
-    @staticmethod
-    def calculate(x: np.ndarray) -> np.ndarray:
+    def name(self):
+        return self.NAME
+
+    def calculate(self, x: np.ndarray) -> np.ndarray:
         return np.maximum(0, x)
     
-    @staticmethod
-    def calulate_derivative(x: np.ndarray) -> np.ndarray:
-        return np.where(x > 0, 1, 0)
+    def calulate_derivative(self, x: np.ndarray) -> np.ndarray:
+        return np.where(self, x > 0, 1, 0)
 
 
 class Sigmoid(Activation):
-    @staticmethod
-    def name():
-        return "sigmoid"
+    def __init__(self):
+        self.NAME = 'sigmoid'
 
-    @staticmethod
-    def calculate(x: np.ndarray) -> np.ndarray:
+    def name(self):
+        return self.NAME
+    
+    def calculate(self, x: np.ndarray) -> np.ndarray:
         return 1.0 / (1.0 + np.exp(-x))
-
-    @staticmethod
-    def calulate_derivative(x: np.ndarray) -> np.ndarray:
-        sig = Sigmoid.calculate(x)
+    
+    def calulate_derivative(self, x: np.ndarray) -> np.ndarray:
+        sig = Sigmoid.calculate(self, x)
         return sig * (1 - sig)
     
 
 class TanH(Activation):
-    @staticmethod
-    def name():
-        return "tanh"
+    def __init__(self):
+        self.NAME = 'tanh'
 
-    @staticmethod
-    def calculate(x: np.ndarray) -> np.ndarray:
-        return np.tanh(x)
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def calulate_derivative(x: np.ndarray) -> np.ndarray:
-        return 1 - np.tanh(x) ** 2
+    def calculate(self, x: np.ndarray) -> np.ndarray:
+        return np.tanh(self, x)
+    
+    def calulate_derivative(self, x: np.ndarray) -> np.ndarray:
+        return 1 - np.tanh(self, x) ** 2
     
 
 class Softmax(Activation):
-    @staticmethod
-    def name():
-        return "softmax"
+    def __init__(self):
+        self.NAME = 'softmax'
 
-    @staticmethod
-    def calculate(x: np.ndarray) -> np.ndarray:
-        exp = np.exp(x - np.max(x, axis=-1, keepdims=True))
+    def name(self):
+        return self.NAME
+    
+    def calculate(self, x: np.ndarray) -> np.ndarray:
+        exp = np.exp(self, x - np.max(self, x, axis=-1, keepdims=True))
         return exp / np.sum(exp, axis=-1, keepdims=True)
     
-    @staticmethod
-    def calulate_derivative(x: np.ndarray) -> np.ndarray:
-        softmax = Softmax.calculate(x)
+    def calulate_derivative(self, x: np.ndarray) -> np.ndarray:
+        softmax = Softmax.calculate(self, x)
         return softmax * (1 - softmax)
     
 
 class Swish(Activation):
-    @staticmethod
-    def name():
-        return "swish"
+    def __init__(self):
+        self.NAME = 'swish'
 
-    @staticmethod
-    def calculate(x: np.ndarray) -> np.ndarray:
-        return x * Sigmoid.calculate(x)
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def calulate_derivative(x: np.ndarray) -> np.ndarray:
-        sigmoid = Softmax.calculate(x)
+    def calculate(self, x: np.ndarray) -> np.ndarray:
+        return x * Sigmoid.calculate(self, x)
+    
+    def calulate_derivative(self, x: np.ndarray) -> np.ndarray:
+        sigmoid = Softmax.calculate(self, x)
         return sigmoid + (1 - sigmoid) * x * sigmoid

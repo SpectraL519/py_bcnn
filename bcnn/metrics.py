@@ -1,47 +1,49 @@
 import numpy as np
-from abc import ABC, abstractstaticmethod
+from abc import ABC, abstractmethod
 
 
 
 class Metric(ABC):
-    @abstractstaticmethod
+    @abstractmethod
     def name():
         pass
 
-    @abstractstaticmethod
-    def requires_probs():
+    @abstractmethod
+    def from_probs():
         pass
 
-    @abstractstaticmethod
+    @abstractmethod
     def calculate(y_pred: np.ndarray, y_true: np.ndarray):
         pass
 
 
 class Accuracy(Metric):
-    @staticmethod
-    def name():
-        return "accuracy"
-    
-    @staticmethod
-    def requires_probs():
-        return False
+    def __init__(self):
+        self.NAME = 'accuracy'
+        self.FROM_PROBS = False
 
-    @staticmethod
-    def calculate(y_pred: np.ndarray, y_true: np.ndarray) -> float:
+    def name(self):
+        return self.NAME
+    
+    def from_probs(self):
+        return self.FROM_PROBS
+    
+    def calculate(self, y_pred: np.ndarray, y_true: np.ndarray) -> float:
         return np.sum(y_pred == y_true) / len(y_true)
     
 
 class Precision(Metric):
-    @staticmethod
-    def name():
-        return "precision"
+    def __init__(self):
+        self.NAME = 'precision'
+        self.FROM_PROBS = False
+
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def requires_probs():
-        return False
+    def from_probs(self):
+        return self.FROM_PROBS
     
-    @staticmethod
-    def calculate(y_pred: np.ndarray, y_true: np.ndarray) -> float:
+    def calculate(self, y_pred: np.ndarray, y_true: np.ndarray) -> float:
         true_positives = np.sum(np.logical_and(y_true == 1, y_pred == 1))
         false_positives = np.sum(np.logical_and(y_true == 0, y_pred == 1))
         
@@ -50,16 +52,17 @@ class Precision(Metric):
 
 
 class Recall(Metric):
-    @staticmethod
-    def name():
-        return "recall"
+    def __init__(self):
+        self.NAME = 'recall'
+        self.FROM_PROBS = False
+
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def requires_probs():
-        return False
+    def from_probs(self):
+        return self.FROM_PROBS
     
-    @staticmethod
-    def calculate(y_pred: np.ndarray, y_true: np.ndarray) -> float:
+    def calculate(self, y_pred: np.ndarray, y_true: np.ndarray) -> float:
         true_positives = np.sum(np.logical_and(y_true == 1, y_pred == 1))
         false_negatives = np.sum(np.logical_and(y_true == 1, y_pred == 0))
         
@@ -68,16 +71,17 @@ class Recall(Metric):
 
 
 class F1Score(Metric):
-    @staticmethod
-    def name():
-        return "f1-score"
+    def __init__(self):
+        self.NAME = 'f1-score'
+        self.FROM_PROBS = False
+
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def requires_probs():
-        return False
+    def from_probs(self):
+        return self.FROM_PROBS
     
-    @staticmethod
-    def calculate(y_pred: np.ndarray, y_true: np.ndarray) -> float:
+    def calculate(self, y_pred: np.ndarray, y_true: np.ndarray) -> float:
         true_positives = np.sum(np.logical_and(y_true == 1, y_pred == 1))
         false_positives = np.sum(np.logical_and(y_true == 0, y_pred == 1))
         false_negatives = np.sum(np.logical_and(y_true == 1, y_pred == 0))
@@ -90,16 +94,17 @@ class F1Score(Metric):
 
 
 class AUC(Metric):
-    @staticmethod
-    def name():
-        return "area under ROC curve"
+    def __init__(self):
+        self.NAME = 'area_under_roc_curve'
+        self.FROM_PROBS = True
+
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def requires_probs():
-        return True
+    def from_probs(self):
+        return self.FROM_PROBS
     
-    @staticmethod
-    def calculate(y_pred_probs: np.ndarray, y_true: np.ndarray) -> float:
+    def calculate(self, y_pred_probs: np.ndarray, y_true: np.ndarray) -> float:
         # sort the predictions in descending order while keeping the corresponding true labels
         sorted_indices = np.argsort(y_pred_probs)[::-1]
         y_true_sorted = y_true[sorted_indices]
@@ -121,16 +126,17 @@ class AUC(Metric):
     
 
 class LogLoss(Metric):
-    @staticmethod
-    def name():
-        return "log loss"
+    def __init__(self):
+        self.NAME = 'log_loss'
+        self.FROM_PROBS = True
+
+    def name(self):
+        return self.NAME
     
-    @staticmethod
-    def requires_probs():
-        return True
+    def from_probs(self):
+        return self.FROM_PROBS
     
-    @staticmethod
-    def calculate(y_pred_probs: np.ndarray, y_true: np.ndarray) -> float:
+    def calculate(self, y_pred_probs: np.ndarray, y_true: np.ndarray) -> float:
         epsilon = 1e-15  # avoid division by zero
         y_pred_probs = np.clip(y_pred_probs, epsilon, 1 - epsilon)  # clip predicted probs
  
