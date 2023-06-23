@@ -28,7 +28,7 @@ class Relu(Activation):
         return np.maximum(0, x)
     
     def calulate_derivative(self, x: np.ndarray) -> np.ndarray:
-        return np.where(self, x > 0, 1, 0)
+        return np.where(x > 0, 1, 0)
 
 
 class Sigmoid(Activation):

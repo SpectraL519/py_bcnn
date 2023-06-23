@@ -89,7 +89,7 @@ class BoxCox(Normalizer):
     
 
 class YeoJohnson(Normalizer):
-    def __init__(self, lmbda: int = None):
+    def __init__(self, lmbda: int = 0):
         self.NAME = 'yeo-johnson'
         self.LMBDA = lmbda
 
