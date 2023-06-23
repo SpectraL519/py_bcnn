@@ -17,7 +17,7 @@ class Activation(ABC):
         pass
 
 
-class Relu(Activation):
+class ReLU(Activation):
     def __init__(self):
         self.NAME = 'relu'
 

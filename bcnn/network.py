@@ -1,3 +1,4 @@
+from typing import Union
 import numpy as np
 
 from bcnn.activation import Activation
@@ -10,7 +11,7 @@ from bcnn.normalizers import Normalizer
 class BinaryClassifier:
     def __init__(self, 
         input_size: int,
-        neurons: list, 
+        neurons: Union[list[int], tuple[int, ...]], 
         activation: Activation,
         metric: Metric,
         loss: Loss,
