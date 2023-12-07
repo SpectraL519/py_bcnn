@@ -27,10 +27,13 @@ class BinaryClassifier:
         self.num_hidden_layers = self.num_layers - 1
         assert(self.num_layers > 1)
 
-        self.W = [np.random.randn(y, x) for x, y in zip(self.neurons[:-1], self.neurons[1:])] # weights
-        self.B = [np.zeros((y, 1)) for y in self.neurons[1:]] # biases
-        self.A = [None] * self.num_hidden_layers # activations
-        self.Z = [None] * self.num_hidden_layers # weghted sums
+        self.weights = [
+            np.random.randn(y, x) 
+            for x, y in zip(self.neurons[:-1], self.neurons[1:])
+        ]
+        self.biases = [np.zeros((y, 1)) for y in self.neurons[1:]]
+        self.activations = [None] * self.num_hidden_layers
+        self.weighted_sums = [None] * self.num_hidden_layers
 
         self.activation = activation
         self.metric = metric
@@ -51,9 +54,9 @@ class BinaryClassifier:
 
 
     def _feed_forward(self, X: np.ndarray):
-        for i, (b, w) in enumerate(zip(self.B, self.W)):
-            self.Z[i] = np.dot(w, (X if i == 0 else self.A[i - 1])) + b
-            self.A[i] = self.activation.calculate(self.Z[i])
+        for i, (b, w) in enumerate(zip(self.biases, self.weights)):
+            self.weighted_sums[i] = np.dot(w, (X if i == 0 else self.activations[i - 1])) + b
+            self.activations[i] = self.activation.calculate(self.weighted_sums[i])
 
     
     def _back_propagate(self, 
@@ -64,24 +67,30 @@ class BinaryClassifier:
         m = X.shape[1]
 
         # derivative vectors
-        dB = [None] * self.num_hidden_layers
-        dW = [None] * self.num_hidden_layers
-        dZ = [None] * self.num_hidden_layers
+        d_biases = [None] * self.num_hidden_layers
+        d_weights = [None] * self.num_hidden_layers
+        d_weighted_sums = [None] * self.num_hidden_layers
 
         # output layer
-        dZ[-1] = self.A[-1] - Y
-        dW[-1] = np.dot(dZ[-1], self.A[-2].T) / m
-        dB[-1] = np.sum(dZ[-1], axis=1, keepdims=True) / m
+        d_weighted_sums[-1] = self.activations[-1] - Y
+        d_weights[-1] = np.dot(d_weighted_sums[-1], self.activations[-2].T) / m
+        d_biases[-1] = np.sum(d_weighted_sums[-1], axis=1, keepdims=True) / m
 
         # hidden layers
         for i in reversed(range(0, self.num_hidden_layers - 1)):
-            dZ[i] = np.dot(self.W[i + 1].T, dZ[i + 1]) * self.activation.calulate_derivative(self.Z[i])
-            dW[i] = np.dot(dZ[i], (X.T if i == 0 else self.A[i - 1].T)) / m
-            dB[i] = np.sum(dZ[i], axis=1, keepdims=True) / m
+            d_weighted_sums[i] = np.dot(
+                self.weights[i + 1].T, 
+                d_weighted_sums[i + 1]
+            ) * self.activation.calulate_derivative(self.weighted_sums[i])
+            d_weights[i] = np.dot(
+                d_weighted_sums[i], 
+                (X.T if i == 0 else self.activations[i - 1].T)
+            ) / m
+            d_biases[i] = np.sum(d_weighted_sums[i], axis=1, keepdims=True) / m
 
         for i in range(self.num_hidden_layers):
-            self.W[i] -= learning_rate * dW[i]
-            self.B[i] -= learning_rate * dB[i]
+            self.weights[i] -= learning_rate * d_weights[i]
+            self.biases[i] -= learning_rate * d_biases[i]
 
 
     def fit(self, 
@@ -100,7 +109,9 @@ class BinaryClassifier:
             self._back_propagate(X, Y, learning_rate)
             if verbose and (i + 1) % step == 0:
                 print(
-                    f"iter {i + 1}: loss = {round(self.loss.calculate(self.A[-1], Y), 4)}",
+                    f"iter {i + 1}: loss = {
+                        round(self.loss.calculate(self.activations[-1], Y), 4)
+                    }",
                     flush=True
                 )
 
@@ -110,7 +121,7 @@ class BinaryClassifier:
             X = self.normalizer.normalize(X)
 
         self._feed_forward(X)
-        return np.where(self.A[-1] >= threshold, 1, 0)
+        return np.where(self.activations[-1] >= threshold, 1, 0)
     
 
     def predict_probs(self, X: np.ndarray) -> np.ndarray:
@@ -118,15 +129,17 @@ class BinaryClassifier:
             X = self.normalizer.normalize(X)
 
         self._feed_forward(X)
-        return self.A[-1]
+        return self.activations[-1]
 
 
-    def evaluate(self, X: np.ndarray, Y: np.ndarray, threshold: float = 0.5) -> tuple[float, float]:
+    def evaluate(
+        self, X: np.ndarray, Y: np.ndarray, threshold: float = 0.5
+    ) -> tuple[float, float]:
         if (self.normalizer):
             X = self.normalizer.normalize(X)
 
         y_pred_probs = self.predict_probs(X)
-        y_pred = np.where(self.A[-1] >= threshold, 1, 0)
+        y_pred = np.where(self.activations[-1] >= threshold, 1, 0)
 
         loss = (
             self.loss.calculate(y_pred_probs, Y)
